@@ -1,38 +1,47 @@
 import React, { useState } from "react";
 import { Icon } from "@iconify/react";
-import { app, auth } from "../../firebase";
+import { Link, useNavigate } from "react-router-dom";
+import { loginWithEmailAndPassword } from "../../firebase";
 import { toast } from "react-toastify";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { Link } from "react-router-dom";
 const Login = () => {
-  const auth = getAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
+  const [togglePass, setTogglePass] = useState(false);
+  const navigate = useNavigate();
+
+  const initialFormData = {
+    email: "",
+    password: "",
+    confirmPassword: "",
+  };
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
-  };
-  const loginUser = () => {
-    if (email === "" || password === "") {
-      toast.warn(" fill all fields");
-    } else {
-      console.log(email, password);
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          console.log(userCredential);
-          toast.success("Registration successful!");
-        })
-        .catch((error) => {
-          console.log(error);
-          if (error.code === "auth/email-already-in-use") {
-            toast.error("This Email is already Registered");
-          }
-          //   toast.error("Registration failed. Please try again.");
-        });
+  const loginUser = async (e) => {
+    e.preventDefault();
+    try {
+      const loginSuccess = await loginWithEmailAndPassword(
+        formData.email,
+        formData.password
+      );
+      if (loginSuccess) {
+        setFormData(initialFormData);
+        navigate("/");
+        toast.success("Login Successful");
+      }
+    } catch (error) {
+      console.log(error);
     }
+  };
+
+  const handleTogglePass = () => {
+    setTogglePass(!togglePass);
   };
   return (
     <div>
@@ -42,24 +51,26 @@ const Login = () => {
           <input
             type="email"
             placeholder="Enter your email"
-            value={email}
-            onChange={handleEmailChange}
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
           />
         </div>
         <div className="input-wrapper mt-4">
           <input
-            type="password"
+            type={togglePass ? " text" : "password"}
             placeholder="Enter your password"
-            value={password}
-            onChange={handlePasswordChange}
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
           />
           <Icon
-            icon="mdi:eye-outline"
-            // icon="mdi:eye-off-outline"
+            icon={togglePass ? "mdi:eye-off-outline" : "mdi:eye-outline"}
             color="black"
             width="24"
             height="24"
             className="ico"
+            onClick={handleTogglePass}
           />
         </div>
         <div className="input-wrapper mt-4 ">

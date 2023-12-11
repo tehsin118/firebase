@@ -8,7 +8,6 @@ import {
   getAuth,
 } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -56,4 +55,45 @@ export const registerWithEmailAndPassword = async (
     return false;
   }
 };
+
+export const getUser = async () => {
+  const user = auth.currentUser;
+  if (user !== null) {
+    const email = user.email;
+    const uid = user.getIdToken;
+  }
+};
+export const loginWithEmailAndPassword = async (email, password) => {
+  try {
+    if (!email || !password) {
+      toast.warn(" Please enter all fields");
+    } else {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      const userData = {
+        uid: user.uid,
+        email: user.email,
+      };
+      localStorage.setItem("signIn", JSON.stringify(userData));
+      console.log("Local storage updated");
+      console.log("Login successful with email/password");
+      console.log("user Logged", userData);
+      return true;
+    }
+  } catch (error) {
+    if (error.code === "auth/invalid-credential") {
+      toast.error("Invalid Email or Password");
+    } else if (error.code === "auth/user-not-found") {
+      toast.error("User not found");
+    } else {
+      console.log(error);
+      return false;
+    }
+  }
+};
+
 export default { app, auth };
