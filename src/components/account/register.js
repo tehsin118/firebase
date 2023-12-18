@@ -16,6 +16,7 @@ const Register = () => {
     password: "",
     confirmPassword: "",
   };
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -37,31 +38,31 @@ const Register = () => {
     } else if (!formData.confirmPassword) {
       toast.warn("Confirm password is required");
     } else if (formData.password !== formData.confirmPassword) {
-      toast.warn("Passwords do not match");
+      toast.warn("Password does not match");
     }
-
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       setLoading(true);
-
-      setTimeout(async () => {
-        await firebase.registerWithEmailAndPassword(
+      try {
+        const result = await firebase.registerWithEmailAndPassword(
           formData.email,
           formData.password,
           formData.confirmPassword
         );
-        setFormData(initialFormData);
+        if (result !== null) {
+          setFormData(initialFormData);
+          setLoading(false);
+          navigate("/login");
+        }
         setLoading(false);
-        // navigate("/login");
-      }, 2000);
-      // navigate("/login");
-    } else {
-      toast.error("eerrorr");
-      setLoading(true);
+      } catch (error) {
+        toast.error("error");
+        setLoading(true);
+      }
     }
   };
 
@@ -73,7 +74,6 @@ const Register = () => {
     <div>
       <div className="login-wrapper pt-5 v-center h-center flex-column">
         <h1>Register</h1>
-        <h1>{loading ? "Loading" : "unl"}</h1>
         <div className="input-wrapper mt-4">
           <input
             type="email"
@@ -121,7 +121,7 @@ const Register = () => {
             className="bg-primary text-white btn-primary"
             onClick={handleSubmit}
           >
-            Register
+            {loading ? "Loading..." : "Register"}
           </button>
         </div>
         <p className="mt-3">

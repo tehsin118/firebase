@@ -9,6 +9,8 @@ import Navbar from "./components/shared/navbar";
 import Footer from "./components/shared/footer";
 import Login from "./components/account/login";
 import Register from "./components/account/register";
+import ProtectedRoute from "./customHooks/protectedRoute";
+
 function App() {
   return (
     <div className="App">
@@ -16,6 +18,8 @@ function App() {
 
       <Navbar />
       <Routes>
+        {/* <Route path="/" element={<ProtectedRoute element={<Home />} />} /> */}
+
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

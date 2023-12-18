@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 const Login = () => {
   const [togglePass, setTogglePass] = useState(false);
   const navigate = useNavigate();
-
+  const [loading, setLoading] = useState(false);
   const initialFormData = {
     email: "",
     password: "",
@@ -25,6 +25,7 @@ const Login = () => {
 
   const loginUser = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const loginSuccess = await loginWithEmailAndPassword(
         formData.email,
@@ -33,6 +34,7 @@ const Login = () => {
       if (loginSuccess) {
         setFormData(initialFormData);
         navigate("/");
+        setLoading(false);
         toast.success("Login Successful");
       }
     } catch (error) {
@@ -78,7 +80,7 @@ const Login = () => {
             className="bg-primary text-white btn-primary"
             onClick={loginUser}
           >
-            Login
+            {loading ? "Loading" : "Login"}
           </button>
         </div>
         <p className="mt-3">

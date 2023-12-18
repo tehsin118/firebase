@@ -79,9 +79,6 @@ export const loginWithEmailAndPassword = async (email, password) => {
         email: user.email,
       };
       localStorage.setItem("signIn", JSON.stringify(userData));
-      console.log("Local storage updated");
-      console.log("Login successful with email/password");
-      console.log("user Logged", userData);
       return true;
     }
   } catch (error) {

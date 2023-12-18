@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { toast } from "react-toastify";
 import {
@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   getAuth,
+  onAuthStateChanged,
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -17,9 +18,7 @@ const firebaseConfig = {
   appId: "1:952557530368:web:7095feca4fade69b47d7e5",
   databaseURL: "https://fir-11025-default-rtdb.firebaseio.com/",
 };
-
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
 
 const FirebaseContext = createContext(null);
@@ -27,6 +26,17 @@ const FirebaseContext = createContext(null);
 export const useFirebase = () => useContext(FirebaseContext);
 
 export const FirebaseProvider = (props) => {
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+
+    // Cleanup the subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
   const registerWithEmailAndPassword = async (
     email,
     password,
@@ -74,9 +84,6 @@ export const FirebaseProvider = (props) => {
           email: user.email,
         };
         localStorage.setItem("signIn", JSON.stringify(userData));
-        console.log("Local storage updated");
-        console.log("Login successful with email/password");
-        console.log("user Logged", userData);
         return true;
       }
     } catch (error) {
@@ -90,10 +97,22 @@ export const FirebaseProvider = (props) => {
       }
     }
   };
-
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setCurrentUser(null);
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
   return (
     <FirebaseContext.Provider
-      value={{ registerWithEmailAndPassword, loginWithEmailAndPassword }}
+      value={{
+        registerWithEmailAndPassword,
+        loginWithEmailAndPassword,
+        currentUser,
+        logout,
+      }}
     >
       {props.children}
     </FirebaseContext.Provider>
